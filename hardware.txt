@@ -1,0 +1,74 @@
+These notes should also apply to the CA4400B, CA240B, EC1400B, EC2400B as they share a common PCB layout.
+
+The board has a 65C02 CPU, three 65C22 VIAs, 1MB of Static RAM, 64K of ROM (split into two banks manually selected by jumper) a 16C654 quad UART, and two PIC16F877 MCUs.
+The PIC at U34 "I/O CPU" handles the inputs along the bottom edge of the board and is connected to the RS485 bus via U43.
+The PIC at U25 "Reader CPU" communicates with the Wiegand devices connected along the top edge of the board and is connected to VIA0 PB6 & PB7. This "Reader CPU" also acts as a watchdog for the 65C02, and will reset it every second or so if it doesn't get serviced.
+Closing Jumper J7 will prevent U25 from running, and thus resetting the 65C02.  It is unknown at this time what the long-term implications might be of holding the PIC in reset, or removing it from the board entirely.
+
+Control Sockets are Pinned as follows:
+
+ Left    Right        _____       C-5   C-4   C-3   C-2   C-1   <- Control Port
+                     |     |       2     2     1     1     0    <- VIA
+   ?     Right    20 | o o | 19   CB2    ?     ?     ?     ?
+Ground   Ground   18 | o o | 17   CA2    ?     ?     ?     ?
+Ground   Ground   16 | o o | 15   PB7   PA7   PB7   PA7   PA7
+Ground   Ground   14 | o o | 13   PB6   PA6   PB6   PA6   PA6
+Ground   Ground   12 | o o   11   PB5   PA5   PB5   PA5   PA5
+   ?      +5V     10 | o o   9    PB4   PA4   PB4   PA4   PA4
+   ?      +5V      8 | o o | 7    PB3   PA3   PB3   PA3   PA3
+   ?      +5V      6 | o o | 5    PB2   PA2   PB2   PA2   PA2
+   ?      +5V      4 | o o | 3    PB1   PA1   PB1   PA1   PA1
+   ?     Right     2 | o o | 1    PB0   PA0   PB0   PA0   PA0
+                     |_____|
+
+$0000 - $7FFF  U10 - 1MB RAM - Banked under control by VIA0
+$8000 - $8007  U20 - 16C654 UART0 9600 BPS
+$8008 - $800F  U20 - 16C654 UART1 38400 BPS
+$8010 - $8017  U20 - 16C654 UART2 "Communication 2" BPS set by System Jumpers
+$8018 - $801F  U20 - 16C654 UART3 "Communication 1" BPS set by System Jumpers
+$8020 - $802F  U24 - 65C22 VIA0 (Closest to CPU) RAM Banking (PB0-4), Reader PIC (PB6 & PB7), Control 1 L/R (PA) 
+$8030 - $803F  U31 - 65C22 VIA1 Control 2/3 L/R
+$8050          U23 - Register to read System Jumpers
+$8060 - $806F  U11 - DS1284 Clock Chip
+$80A0 - $80AF  U30 - 65C22 VIA2 (Furthest from CPU) Control 4/5 L/R
+$80B0          U33 - Reader LED control
+
+U18 74LS138 $8000 - $807F
+U18 Pin 15 Y0 - $800x \_ ANDed together for 16C654 Chip Select
+U18 Pin 14 Y1 - $801x /
+U18 Pin 13 Y2 - $802x VIA0 CS1
+U18 Pin 12 Y3 - $803x VIA1 CS1
+U18 Pin 11 Y4 - $804x Unused? Deadends near U45 Pin 16
+U18 Pin 10 Y5 - $805x U23 Pin 19
+U18 Pin 9  Y6 - $806x U14 Pin 4 -> U11 RTC CS
+U18 Pin 7  Y7 - $807x Unused?
+
+U19 74LS138 $8080 - $80FF
+U19 Pin 15 Y0 - $808x Unused?
+U19 Pin 14 Y1 - $809x Unused?
+U19 Pin 13 Y2 - $80Ax VIA2 CS1
+U19 Pin 12 Y3 - $80Bx U33 Pin 2 -> U32 LED Buffer CS
+U19 Pin 11 Y4 - $80Cx Unused?
+U19 Pin 10 Y5 - $80Dx Unused?
+U19 Pin 9  Y6 - $80Ex Unused?
+U19 Pin 7  Y7 - $80Fx Unused?
+
+VIA0 Port B pins 0-4 set the bank address for the RAM it appears some portion of each bank may be lost to allow a shared bank for Zero Page and Stack (unconfirmed)
+VIA0 Pin 10 PB0 -> U3B A3 (OR Gate) Y3 -> U10 A15
+VIA0 Pin 11 PB1 -> U3A A1 (OR Gate) Y1 -> U10 A16
+VIA0 Pin 12 PB2 -> U3A A2 (OR Gate) Y2 -> U10 A17
+VIA0 Pin 13 PB3 -> U3A A4 (OR Gate) Y4 -> U10 A18
+VIA0 Pin 14 PB4 -> U3B A1 (OR Gate) Y1 -> U10 A19
+
+
+At boot, a short delay is executed before the three VIAs are initialized, and the system jumpers cached for later use
+(seemingly only the Temporary Card Countdown setting is used from the saved copy)
+next the UARTs are initialized, 
+
+
+
+
+U25 "Reader CPU" Notes
+PB1, PB2, PE0, PE1 are outputs. All other pins are left as inputs.
+PB0 and PB1 appeear to be used for comms to the 65C02 with PB0 used as clock from the 65C02 and PB1 used for data to the 65C02.
+PB2 appears to control the 65C02 reset.
