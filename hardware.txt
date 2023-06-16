@@ -53,19 +53,14 @@ U19 Pin 10 Y5 - $80Dx Unused?
 U19 Pin 9  Y6 - $80Ex Unused?
 U19 Pin 7  Y7 - $80Fx Unused?
 
-VIA0 Port B pins 0-4 set the bank address for the RAM it appears some portion of each bank may be lost to allow a shared bank for Zero Page and Stack (unconfirmed)
+VIA0 Port B pins 0-4 set the bank address for the RAM.  Pages $0000 and $0100 are shared across all 32 banks, leaving 31.5KB of the RAM unusable.
 VIA0 Pin 10 PB0 -> U3B A3 (OR Gate) Y3 -> U10 A15
 VIA0 Pin 11 PB1 -> U3A A1 (OR Gate) Y1 -> U10 A16
 VIA0 Pin 12 PB2 -> U3A A2 (OR Gate) Y2 -> U10 A17
 VIA0 Pin 13 PB3 -> U3A A4 (OR Gate) Y4 -> U10 A18
 VIA0 Pin 14 PB4 -> U3B A1 (OR Gate) Y1 -> U10 A19
 
-
-At boot, a short delay is executed before the three VIAs are initialized, and the system jumpers cached for later use
-(seemingly only the Temporary Card Countdown setting is used from the saved copy)
-next the UARTs are initialized, 
-
-
+The 65C02 NMI pin is connected to jumper J1 "Clear Memory"  On the original firmware this would start a routine to initialize the card DB kept in battery backed RAM.
 
 
 U25 "Reader CPU" Notes
