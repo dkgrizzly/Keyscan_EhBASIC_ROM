@@ -10,8 +10,8 @@
 ;
 
 Serbuf      =   $200    ; 128 byte buffer
-Bufin       =   $EA     ; zp pointer
-Bufout      =   $EB     ; zp pointer
+Bufin       =   $E8     ; zp pointer
+Bufout      =   $E9     ; zp pointer
 
 UART0_DAT   =   $8000
 UART0_DLL   =   $8000

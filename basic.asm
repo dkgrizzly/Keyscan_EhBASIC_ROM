@@ -48,6 +48,14 @@ LAB_WARM          = $00       ; BASIC warm start entry point
 Wrmjpl            = LAB_WARM+1; BASIC warm start vector jump low byte
 Wrmjph            = LAB_WARM+2; BASIC warm start vector jump high byte
 
+;                 = $03       ; unused
+;                 = $04       ; unused
+;                 = $05       ; unused
+;                 = $06       ; unused
+;                 = $07       ; unused
+;                 = $08       ; unused
+;                 = $09       ; unused
+
 Usrjmp            = $0A       ; USR function JMP address
 Usrjpl            = Usrjmp+1  ; USR function JMP vector low byte
 Usrjph            = Usrjmp+2  ; USR function JMP vector high byte
@@ -62,6 +70,82 @@ Itemph            = Itempl+1  ; temporary integer high byte
 nums_1            = Itempl    ; number to bin/hex string convert MSB
 nums_2            = nums_1+1  ; number to bin/hex string convert
 nums_3            = nums_1+2  ; number to bin/hex string convert LSB
+
+;                 = $14       ; unused
+;                 = $15       ; unused
+;                 = $16       ; unused
+;                 = $17       ; unused
+;                 = $18       ; unused
+;                 = $19       ; unused
+;                 = $1A       ; unused
+;                 = $1B       ; unused
+;                 = $1C       ; unused
+;                 = $1D       ; unused
+;                 = $1E       ; unused
+;                 = $1F       ; unused
+
+;                 = $20       ; unused
+;                 = $21       ; unused
+;                 = $22       ; unused
+;                 = $23       ; unused
+;                 = $24       ; unused
+;                 = $25       ; unused
+;                 = $26       ; unused
+;                 = $27       ; unused
+;                 = $28       ; unused
+;                 = $29       ; unused
+;                 = $2A       ; unused
+;                 = $2B       ; unused
+;                 = $2C       ; unused
+;                 = $2D       ; unused
+;                 = $2E       ; unused
+;                 = $2F       ; unused
+
+;                 = $30       ; Reserved - Monitor
+;                 = $31       ; Reserved - Monitor
+;                 = $32       ; Monitor Prompt
+;                 = $33       ; Monitor Line Count
+;                 = $34       ; Monitor Mode Jump
+;                 = $35       ; Monitor Hed Digit Count      / XModem Last Block Flag
+;                 = $36       ; Monitor OP Code Text Pointer / XModem Block Number
+;                 = $37       ; Monitor Mem Char             / XModem Error Count / Block Flag
+;                 = $38       ; Monitor Start addr low byte  / XModem CRC low byte
+;                 = $39       ; Monitor Start addr high byte / XModem CRC high byte
+;                 = $3A       ; Monitor addr ptr low byte    / XModem Data pointer low byte
+;                 = $3B       ; Monitor addr ptr high byte   / XModem Data pointer high byte
+;                 = $3C       ; Monitor hex digits low byte  / XModem End of file pointer low byte
+;                 = $3D       ; Monitor hex digits high byte / XModem End of file pointer high byte
+;                 = $3E       ; Monitor memory ptr low byte  / XModem Retry Counter 1
+;                 = $3F       ; Monitor memory ptr high byte / XModem Retry Counter 2
+
+;                 = $40       ; Reserved - Filesystem
+;                 = $41       ; Reserved - Filesystem
+;                 = $42       ; Reserved - Filesystem
+;                 = $43       ; Reserved - Filesystem
+;                 = $44       ; Reserved - Filesystem
+;                 = $45       ; Reserved - Filesystem
+;                 = $46       ; Reserved - Filesystem
+;                 = $47       ; Reserved - Filesystem
+;                 = $48       ; Reserved - Filesystem
+;                 = $49       ; Reserved - Filesystem
+;                 = $4A       ; Reserved - Filesystem
+;                 = $4B       ; Reserved - Filesystem
+;                 = $4C       ; Reserved - Filesystem
+;                 = $4D       ; Reserved - Filesystem
+;                 = $4E       ; Reserved - Filesystem
+;                 = $4F       ; Reserved - Filesystem
+;                 = $50       ; Reserved - Filesystem
+;                 = $51       ; Reserved - Filesystem
+;                 = $52       ; Reserved - Filesystem
+;                 = $53       ; Reserved - Filesystem
+;                 = $54       ; Reserved - Filesystem
+;                 = $55       ; Reserved - Filesystem
+;                 = $56       ; Reserved - Filesystem
+;                 = $57       ; Reserved - Filesystem
+
+;                 = $58       ; VIA0 System Ticks low byte (256Hz)
+;                 = $59       ; VIA0 System Ticks mid byte (1Hz)
+;                 = $5A       ; VIA0 System Ticks high byte (1/256Hz)
 
 Srchc             = $5B       ; search character
 Temp3             = Srchc     ; temp byte used in number routines
@@ -293,21 +377,19 @@ IrqBase           = $DF       ; IRQ handler enabled/setup/triggered flags
 ;                 = $E0       ; IRQ handler addr low byte
 ;                 = $E1       ; IRQ handler addr high byte
 
-; *** removed unused comments for $DE-$E1
-
-;                 = $E2       ; unused
-;                 = $E3       ; unused
-;                 = $E4       ; unused
-;                 = $E5       ; unused
-;                 = $E6       ; unused
-;                 = $E7       ; unused
-;                 = $E8       ; unused
-;                 = $E9       ; unused
-;                 = $EA       ; unused
-;                 = $EB       ; unused
-;                 = $EC       ; unused
+;                 = $E2       ; LED Pointer
+;                 = $E3       ; LED Digit Counter
+;                 = $E4       ; LED Scan Delay
+;                 = $E5       ; LED Scan Counter
+;                 = $E6       ; Config Checksum 1
+;                 = $E7       ; Config Checksum 2
+;                 = $E8       ; Serial Bufin Ptr
+;                 = $E9       ; Serial Bufout Ptr
+;                 = $EA       ; SDCard Data address low byte
+;                 = $EB       ; SDCard Data address high byte
+;                 = $EC       ; SDCard Status
 ;                 = $ED       ; unused
-;                 = $EE       ; unused
+;                 = $EE       ; Current RAM Bank Number
 
 Decss             = $EF       ; number to decimal string start
 Decssp1           = Decss+1   ; number to decimal string start
@@ -1072,6 +1154,14 @@ LAB_13AC
       LDA   Ibuffs,X          ; get byte from input buffer
       BEQ   LAB_13EC          ; if null save byte then exit
 
+      CMP   #'{'              ; convert lower to upper case
+      BCS   LAB_13EC          ; is above lower case
+      CMP   #'a'
+      BCC   PATCH_LC          ; is below lower case
+      AND   #$DF              ; mask lower case bit
+      
+PATCH_LC
+
       CMP   #'_'              ; compare with "_"
       BCS   LAB_13EC          ; if >= go save byte then continue crunching
 
@@ -1106,7 +1196,7 @@ LAB_13D0
       CMP   (ut2_pl),Y        ; compare with keyword first character table byte
       BEQ   LAB_13D1          ; go do word_table_chr if match
 
-      BCC   LAB_13EA          ; if < keyword first character table byte go restore
+      BCC   PATCH_LC2         ; if < keyword first character table byte go restore
                               ; Y and save to crunched
 
       INY                     ; else increment pointer
@@ -1134,7 +1224,8 @@ LAB_13D8
       BMI   LAB_13EA          ; all bytes matched so go save token
 
       INX                     ; next buffer byte
-      CMP   Ibuffs,X          ; compare with byte from input buffer
+      EOR     Ibuffs,x        ; check bits against table
+      AND     #$DF            ; DF masks the upper/lower case bit
       BEQ   LAB_13D6          ; go compare next if match
 
       BNE   LAB_1417          ; branch if >< (not found keyword)
@@ -1196,6 +1287,8 @@ LAB_141B
 
       LDA   (ut2_pl),Y        ; get byte from keyword table
       BNE   LAB_13D8          ; go test next word if not zero byte (end of table)
+
+PATCH_LC2
 
                               ; reached end of table with no match
       LDA   Ibuffs,X          ; restore byte from input buffer

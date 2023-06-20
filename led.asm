@@ -13,9 +13,9 @@ LDbuff      =   $2C0        ; descrete LED bit pattern buffer 32 bits max
 Lptr        =   $E2     ; LED pointer
 Ldig        =   $E3     ; digit counter
 Lscn        =   $E4     ; 16 bit scan speed delay
-Lscnc       =   $E6     ; scan counter
-LEDchk1     =   $E8     ; config checksum 1
-LEDchk2     =   $E9     ; config checksum 2
+Lscnc       =   $E5     ; scan counter
+LEDchk1     =   $E6     ; config checksum 1
+LEDchk2     =   $E7     ; config checksum 2
 
 LEDIO       =   $80B0       ; IO address base for LED display
 
