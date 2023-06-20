@@ -28,9 +28,11 @@ InitDelay
                 LDX   #$FF              ;
                 TXS                     ; init stack pointer
 
-                JSR   VIA_Init
+                JSR   VIA_Init          ; init VIA ports and timers
                 JSR   Serial_Init       ; init serial port
-                JSR   LED_Init
+                JSR   RTC_Init          ; init clock
+                ;JSR   SD_Init           ; init SD Cards
+                JSR   LED_Init          ; init LED animation
 
                 LDA   #$00              ; Clear registers
                 TAY                     ;
@@ -40,7 +42,11 @@ InitDelay
                 CLI                     ; enable IRQ's
                 JMP  MonitorBoot        ; Monitor for cold reset                       
 
+
+
 NMIjump         RTI                     ; NMI null routine
+
+
 
 Interrupt       PHA                     ; Save A
                 TXA                     ; Save X
@@ -58,48 +64,51 @@ Interrupt       PHA                     ; Save A
 
                 CLD                     ; Clear decimal mode
 
-                LDA UART0_ISR           ; Check UARTs for RX data
+; Check UARTs for RX data
+.UART0_CheckIRQ
+                LDA UART0_ISR
                 LSR
-                BCS UART1_CheckIRQ
+                BCS .UART1_CheckIRQ
                 JSR UART0_IRQ_Handler
 
-UART1_CheckIRQ
+.UART1_CheckIRQ
                 LDA UART1_ISR
                 LSR
-                BCS UART2_CheckIRQ
+                BCS .UART2_CheckIRQ
                 JSR UART1_IRQ_Handler
 
-UART2_CheckIRQ
+.UART2_CheckIRQ
                 LDA UART2_ISR
                 LSR
-                BCS UART3_CheckIRQ
+                BCS .UART3_CheckIRQ
                 JSR UART2_IRQ_Handler
 
-UART3_CheckIRQ
+.UART3_CheckIRQ
                 LDA UART3_ISR
                 LSR
-                BCS VIA1_CheckIRQ
+                BCS .VIA1_CheckIRQ
                 JSR UART3_IRQ_Handler
 
-VIA1_CheckIRQ
-                LDA VIA1_IER            ; Check for VIA1 Timer IRQ
+; Check for VIA Timer IRQs
+.VIA1_CheckIRQ
+                LDA VIA1_IER
                 AND VIA1_IFR
-                BPL VIA0_CheckIRQ
+                BPL .VIA0_CheckIRQ
                 JSR VIA1_IRQ_Handler
 
-VIA0_CheckIRQ
+.VIA0_CheckIRQ
                 LDA VIA0_IER
                 AND VIA0_IFR
-                BPL VIA2_CheckIRQ
+                BPL .VIA2_CheckIRQ
                 JSR VIA0_IRQ_Handler
 
-VIA2_CheckIRQ
+.VIA2_CheckIRQ
                 LDA VIA2_IER
                 AND VIA2_IFR
-                BPL ReturnFromInterrupt
+                BPL .ReturnFromInterrupt
                 JSR VIA2_IRQ_Handler
 
-ReturnFromInterrupt                
+.ReturnFromInterrupt                
                 PLA                     ; Restore RAM Bank
                 STA RAMBANK
                 LDA VIA0_ORB
@@ -114,6 +123,14 @@ ReturnFromInterrupt
                 PLA                     ; Restore A
                 RTI
 
+SwitchBank
+                AND #$1F
+                STA RAMBANK
+                LDA VIA0_ORB
+                AND #$E0
+                ORA RAMBANK
+                STA VIA0_ORB
+                RTS
 ;
 ;  NMIjmp      =     $FFFA             
 ;  RESjmp      =     $FFFC             
