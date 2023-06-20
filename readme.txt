@@ -3,10 +3,8 @@
  After a few days of reverse engineering this firmware is the result.
 
  Attach a serial terminal to the Communications 1 port on the board and set it
- for 9600 baud, 8n1 RS232.  At this time the Wiegand Reader CPU must be removed
- since it will constantly reboot the 65C02 when it reaches a timeout for comms.
- You will likely need to use the system reset jumper since the Reader CPU is
- normally responsible for the Power On Reset of the 65C02.
+ for 9600 baud, 8n1 RS232.  The PIC16F877 "Reader CPU" must be reprogrammed
+ since it would otherwise constantly reboot the 65C02 when it isn't serviced.
  
  The IO CPU can stay in the board as it won't interfere with operation of this
  firmware.
