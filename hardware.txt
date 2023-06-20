@@ -9,16 +9,16 @@ Control Sockets are Pinned as follows:
 
  Left    Right        _____       C-5   C-4   C-3   C-2   C-1   <- Control Port
                      |     |       2     2     1     1     0    <- VIA
-   ?     Right    20 | o o | 19   CB2    ?     ?     ?     ?
-Ground   Ground   18 | o o | 17   CA2    ?     ?     ?     ?
+   NC    Right    20 | o o | 19   CB2   NC    NC    NC    NC
+Ground   Ground   18 | o o | 17   CA2   NC    NC    NC    NC
 Ground   Ground   16 | o o | 15   PB7   PA7   PB7   PA7   PA7
 Ground   Ground   14 | o o | 13   PB6   PA6   PB6   PA6   PA6
 Ground   Ground   12 | o o   11   PB5   PA5   PB5   PA5   PA5
-   ?      +5V     10 | o o   9    PB4   PA4   PB4   PA4   PA4
-   ?      +5V      8 | o o | 7    PB3   PA3   PB3   PA3   PA3
-   ?      +5V      6 | o o | 5    PB2   PA2   PB2   PA2   PA2
-   ?      +5V      4 | o o | 3    PB1   PA1   PB1   PA1   PA1
-   ?     Right     2 | o o | 1    PB0   PA0   PB0   PA0   PA0
+   NC     +5V     10 | o o   9    PB4   PA4   PB4   PA4   PA4
+   NC     +5V      8 | o o | 7    PB3   PA3   PB3   PA3   PA3
+   NC     +5V      6 | o o | 5    PB2   PA2   PB2   PA2   PA2
+   NC     +5V      4 | o o | 3    PB1   PA1   PB1   PA1   PA1
+   NC    Right     2 | o o | 1    PB0   PA0   PB0   PA0   PA0
                      |_____|
 
 $0000 - $7FFF  U10 - 1MB RAM - Banked under control by VIA0
@@ -53,19 +53,14 @@ U19 Pin 10 Y5 - $80Dx Unused?
 U19 Pin 9  Y6 - $80Ex Unused?
 U19 Pin 7  Y7 - $80Fx Unused?
 
-VIA0 Port B pins 0-4 set the bank address for the RAM it appears some portion of each bank may be lost to allow a shared bank for Zero Page and Stack (unconfirmed)
+VIA0 Port B pins 0-4 set the bank address for the RAM.  Pages $0000 and $0100 are shared across all 32 banks, leaving 31.5KB of the RAM unusable.
 VIA0 Pin 10 PB0 -> U3B A3 (OR Gate) Y3 -> U10 A15
 VIA0 Pin 11 PB1 -> U3A A1 (OR Gate) Y1 -> U10 A16
 VIA0 Pin 12 PB2 -> U3A A2 (OR Gate) Y2 -> U10 A17
 VIA0 Pin 13 PB3 -> U3A A4 (OR Gate) Y4 -> U10 A18
 VIA0 Pin 14 PB4 -> U3B A1 (OR Gate) Y1 -> U10 A19
 
-
-At boot, a short delay is executed before the three VIAs are initialized, and the system jumpers cached for later use
-(seemingly only the Temporary Card Countdown setting is used from the saved copy)
-next the UARTs are initialized, 
-
-
+The 65C02 NMI pin is connected to jumper J1 "Clear Memory"  On the original firmware this would start a routine to initialize the card DB kept in battery backed RAM.
 
 
 U25 "Reader CPU" Notes
