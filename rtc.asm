@@ -16,3 +16,12 @@ RTC_WD_DECISECONDS  =   $806C
 RTC_WD_SECONDS      =   $806D
 RTC_USER0           =   $806E
 RTC_USER1           =   $806F
+
+RTC_Init
+    LDA #$8C            ; Disable Interrupts
+    STA RTC_COMMAND
+    LDA #0              ; Watchdog every 1-minute (masked above)
+    STA RTC_MINALARM
+    STA RTC_HRALARM
+    STA RTC_DAYALARM
+    RTS
