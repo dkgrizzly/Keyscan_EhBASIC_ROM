@@ -51,6 +51,9 @@ VIA2_IFR    =   $80AD
 VIA2_IER    =   $80AE
 VIA2_ORB_NH =   $80AF
 
+ZP_SYSTICKS =   $58     ; System Ticks low byte (256Hz)
+;           =   $59     ; System Ticks mid byte (1Hz)
+;           =   $5A     ; System Ticks high byte (1/256Hz)
 
 ;----------------------------------------------------------------------------
 VIA_Init
@@ -67,9 +70,9 @@ VIA_Init
         LDA #$C1        ; Enable Timer2, CB1, CA2 interrupts
         STA VIA0_IER
 
-        LDA #$50        ; 50000 Ticks // 295Hz?
+        LDA #$FF        ; 57600 Ticks // 256Hz
         STA VIA0_T1C_L
-        LDA #$C3
+        LDA #$E0
         STA VIA0_T1C_H
 
         LDA #$E2
@@ -100,48 +103,72 @@ VIA_Init
         LDA #$7F
         STA VIA1_T1C_H
 
+        LDA #0
+        STA ZP_SYSTICKS
+        STA ZP_SYSTICKS+1
+        STA ZP_SYSTICKS+2
+
         PLA
         RTS
 
-; VIA0 CA2
 VIA0_IRQ_Handler
         LSR
         BCS VIA0_CA2_Handler
         LSR
         LSR
         LSR
+        BCS VIA0_CB2_Handler
         LSR
         LSR
         LSR
         BCS VIA0_Timer1_Handler
-        LDA #$3E
-        STA VIA0_IFR        ; Clear any unhandled interrupts
+        LDA #$36
+        STA VIA0_IFR        ; Clear any unexpected interrupts
         RTS
 
 VIA0_CA2_Handler
-        ;LDA RTC_MINALARM
-        LDA #$01
+        LDA #$01            ; Clear the interrupt
         STA VIA0_IFR
-        ;LDA #$41
-        ;STA VIA0_IER
         RTS
 
+VIA0_CB2_Handler
+        LDA #$08            ; Clear the interrupt
+        STA VIA0_IFR
+        RTS
+
+; 256Hz Timer Interrupt
 VIA0_Timer1_Handler
-        ;LDA VIA0_T1C_L
-        ;..
-        ;..
-        ;LDA VIA0_ORB
-        ;BPL ...             ; Branch based on VIA0 PB7
-        LDA #$7F
+        LDA #$FF            ; Reset the Timer
+        STA VIA0_T1C_L
+        LDA #$E0
+        STA VIA0_T1C_H
+
+        JSR LED_scan
+
+        INC ZP_SYSTICKS
+        BNE .done
+
+        INC ZP_SYSTICKS+1
+        BNE .done
+
+        INC ZP_SYSTICKS+2
+        BNE .done
+
+.done
+        LDA #$40            ; Clear the interrupt
         STA VIA0_IFR
         RTS
 
-
-; 450Hz Timer
 VIA1_IRQ_Handler
         AND #$40
-        BEQ VIA1_IRQ_Done
+        BNE VIA1_Timer1_Handler
 
+        LDA #$7F
+        STA VIA1_IFR        ; Clear any unexpected interrupts
+        RTS
+
+; 450Hz Timer Interrupt
+VIA1_Timer1_Handler
         LDA #$FF            ; Reset the Timer
         STA VIA1_T1C_L
         LDA #$7F
@@ -149,8 +176,22 @@ VIA1_IRQ_Handler
 
         LDA #$40            ; Clear the interrupt
         STA VIA1_IFR
-VIA1_IRQ_Done
         RTS
 
 VIA2_IRQ_Handler
+        AND #$40
+        BNE VIA2_Timer1_Handler
+
+        LDA #$7F
+        STA VIA2_IFR        ; Clear any unexpected interrupts
+        RTS
+
+VIA2_Timer1_Handler
+        LDA #$FF            ; Reset the Timer
+        STA VIA2_T1C_L
+        LDA #$7F
+        STA VIA2_T1C_H
+
+        LDA #$40            ; Clear the interrupt
+        STA VIA2_IFR
         RTS
