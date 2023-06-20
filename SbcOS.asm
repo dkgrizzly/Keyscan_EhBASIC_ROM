@@ -53,8 +53,7 @@ Buffer         =     $0280             ; keybd input buffer (127 chrs max)
 
 FixedEntry
                JMP MonitorBoot
-                
-
+              
 Print_CR       PHA                     ; Save Acc
                LDA   #$0D              ; "cr"
                JSR   Output            ; send it
@@ -224,15 +223,6 @@ Help_cmd2      jsr   Inc_addrptr       ;
 Help_cmd3      lda   (Addrptr)         ;
                bne   Help_cmd4         ;
 Lrts           rts                     ;
-Power_cmd      cpy   #$01              ; Power command must be P*
-               bne   Lrts              ; invalid format, exit
-               lda   Buffer, y         ; get second character
-               cmp   #'*'              ; is it *?
-               bne   Lrts              ; invalid format, exit
-               sei                     ; disable IRQ
-               lda   #$FF              ;
-               sta   $F0FF             ; turn off LED display
-PowerLP        bra   PowerLP           ; endless loop
 Version        jsr   Print_CR          ; 
                ldx   #$FF              ; set txt pointer
                lda   #$0d              ; 
@@ -1047,7 +1037,7 @@ Cmdjmptbl      .word CR_cmd            ; 0  enter   cmd jmp table
                .word Insert_cmd        ; 8    i
                .word LIST_cmd          ; 9    l
                .word Move_cmd          ; A    m
-               .word Power_cmd         ; B    p
+               .word Version           ; B    p    Placeholder, was Page Dump
                .word TXT_cmd           ; C    q
                .word TXT_cmd           ; D    s 
                .word LAB_COLD          ; E    @
@@ -1741,7 +1731,6 @@ HelpTxt        .byte "~Commands are :~"
                .byte "[HHHH]{U}{Return} - Upload File from PC to SBC (Xmodem/CRC)~"
                .byte "[HHHH.HHHH]{X}{Return} - Download File from SBC to PC (Xmodem/CRC)~"
                .byte "{V}{Return} - Monitor Version~"
-               .byte "{P*}{Return} - Protected Power Down~"
                .byte "{!}{Return} - Enter Assembler~"
                .byte "{@}{Return} - Cold-Start EhBASIC~"
                .byte "{#}{Return} - Warm-Start EhBASIC~"
